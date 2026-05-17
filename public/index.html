@@ -374,6 +374,7 @@
           {
             source: "trend",
             experimentTag: "trend-proof-technology",
+            draftType: "fast-take",
             visibilityRisk: 12,
             predictedScore: 38,
             topicCluster: "technology",
@@ -383,6 +384,7 @@
           {
             source: "evergreen",
             experimentTag: "opinion-contrarian-offer",
+            draftType: "contrarian-angle",
             visibilityRisk: 8,
             predictedScore: 27,
             topicCluster: "offer design",
@@ -465,7 +467,7 @@
           <article class="item">
             <div class="chips">
               <span class="chip ${item.source === "trend" ? "trend" : ""}">${escapeHtml(item.source || "evergreen")}</span>
-              <span class="chip">${escapeHtml(item.experimentTag || "queue")}</span>
+              <span class="chip">${escapeHtml(item.draftType || item.experimentTag || "queue")}</span>
               <span class="chip risk">risk ${escapeHtml(item.visibilityRisk ?? 0)}</span>
             </div>
             <div class="tweet">${escapeHtml(item.text)}</div>
@@ -605,18 +607,19 @@
         setNotice("Generating post drafts…", "success");
 
         try {
-          const payload = await safeJson("/api/generate", { method: "GET" });
+          const payload = await safeJson("/api/breaking", { method: "GET" });
           const nextState = {
             ...dashboardState,
-            nextUp: payload.queued,
+            nextUp: payload.drafts,
             summary: {
               ...dashboardState.summary,
-              queued: payload.queued.length
+              queued: payload.drafts.length,
+              trends: payload.stories.length
             },
             updatedAt: new Date().toISOString()
           };
           render(nextState);
-          setNotice(`Generated ${payload.generatedCount} fresh post drafts.`, "success");
+          setNotice(`Generated ${payload.generatedCount} breaking-news drafts.`, "success");
         } catch (error) {
           setNotice(error.message || "Generate failed.", "error");
         } finally {

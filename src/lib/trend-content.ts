@@ -44,3 +44,88 @@ export function createTrendQueueItems(stories: TrendStory[], limit: number, offs
 
   return generated.filter(passesQualityFilter);
 }
+
+type BreakingDraft = {
+  id: string;
+  source: "trend";
+  mode: "breaking";
+  draftType: "fast-take" | "why-it-matters" | "contrarian-angle";
+  headline: string;
+  storyUrl: string;
+  storySource: string;
+  topicCluster: string;
+  text: string;
+  predictedScore: number;
+  visibilityRisk: number;
+};
+
+function buildBreakingText(
+  story: TrendStory,
+  draftType: BreakingDraft["draftType"],
+  seed: number
+): string {
+  const proof = pickOne(persona.socialProofTemplates, seed + 1);
+  const hook = pickOne(persona.trendHooks, seed + 2);
+
+  if (draftType === "fast-take") {
+    return truncateForX(
+      `${hook} ${story.headline}\n\nFast take: ${proof}\n\nSource: ${story.source}`
+    );
+  }
+
+  if (draftType === "why-it-matters") {
+    return truncateForX(
+      `Why this matters right now:\n${story.headline}\n\nIf this keeps moving, creators and operators should pay attention early, not after the conversation is crowded.\n\nSource: ${story.source}`
+    );
+  }
+
+  return truncateForX(
+    `Contrarian take:\nMost people will repeat the headline. Better post: explain the second-order effect.\n\n${story.headline}\n\nSource: ${story.source}`
+  );
+}
+
+export function createBreakingDrafts(stories: TrendStory[], storyLimit = 5): BreakingDraft[] {
+  const draftTypes: BreakingDraft["draftType"][] = ["fast-take", "why-it-matters", "contrarian-angle"];
+  const drafts: BreakingDraft[] = [];
+
+  stories.slice(0, storyLimit).forEach((story, storyIndex) => {
+    draftTypes.forEach((draftType, typeIndex) => {
+      const seed = storyIndex * 10 + typeIndex;
+      const text = buildBreakingText(story, draftType, seed);
+      const scored = scorePost(text, false);
+
+      const draft: BreakingDraft = {
+        id: `breaking-${slugify(story.source)}-${story.id}-${draftType}`,
+        source: "trend",
+        mode: "breaking",
+        draftType,
+        headline: story.headline,
+        storyUrl: story.url,
+        storySource: story.source,
+        topicCluster: story.category,
+        text,
+        predictedScore: Math.round(scored.predictedScore * 0.65 + story.trendScore * 0.35),
+        visibilityRisk: scored.visibilityRisk
+      };
+
+      if (passesQualityFilter({
+        id: draft.id,
+        createdAt: new Date().toISOString(),
+        source: "trend",
+        pillar: "opinion",
+        format: "proof",
+        topicCluster: draft.topicCluster,
+        text: draft.text,
+        predictedScore: draft.predictedScore,
+        visibilityRisk: draft.visibilityRisk,
+        prediction: scored.prediction,
+        experimentTag: `breaking-${draft.draftType}-${slugify(draft.topicCluster)}`,
+        status: "queued"
+      })) {
+        drafts.push(draft);
+      }
+    });
+  });
+
+  return drafts.sort((a, b) => b.predictedScore - a.predictedScore || a.visibilityRisk - b.visibilityRisk);
+}
