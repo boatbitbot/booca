@@ -1,9 +1,18 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 
 import { list, put } from "@vercel/blob";
 
-const dataDir = path.resolve(process.cwd(), "data");
+function resolveDataDir(): string {
+  if (process.env.VERCEL && !process.env.BLOB_READ_WRITE_TOKEN) {
+    return path.join(os.tmpdir(), "x-autopilot-data");
+  }
+
+  return path.resolve(process.cwd(), "data");
+}
+
+const dataDir = resolveDataDir();
 
 function localPath(name: string): string {
   return path.join(dataDir, name);
