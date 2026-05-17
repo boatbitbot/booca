@@ -48,7 +48,9 @@ export default async function handler(_req: VercelRequest, res: VercelResponse):
         queueTarget: runtime.queueTarget,
         postsPerRun: runtime.postsPerRun,
         trendPostsPerRun: runtime.trendPostsPerRun,
-        trendAutoPost: runtime.trendAutoPost
+        trendAutoPost: runtime.trendAutoPost,
+        breakingPostsPerRun: runtime.breakingPostsPerRun,
+        breakingStoryLimit: runtime.breakingStoryLimit
       },
       summary: {
         queued: queued.length,

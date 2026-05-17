@@ -51,6 +51,8 @@ export type QueueItem = {
   id: string;
   createdAt: string;
   source: "evergreen" | "trend";
+  mode?: "queued" | "breaking";
+  draftType?: "fast-take" | "why-it-matters" | "contrarian-angle" | "prediction" | "creator-angle";
   pillar: ContentPillar;
   format: PostFormat;
   topicCluster: string;
@@ -76,6 +78,8 @@ export type RuntimeConfig = {
   postsPerRun: number;
   trendPostsPerRun: number;
   trendAutoPost: boolean;
+  breakingPostsPerRun: number;
+  breakingStoryLimit: number;
 };
 
 export type PerformanceRecord = {

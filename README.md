@@ -77,8 +77,12 @@ This project can also create daily-news reaction posts from live RSS feeds.
 - `npm run run-cycle` now fetches trends before queue generation
 - `TREND_AUTO_POST=false` keeps news-reactive posts in the queue for review only
 - `TREND_AUTO_POST=true` lets the cycle auto-publish top-scoring trend posts too
+- `BREAKING_POSTS_PER_RUN=3` queues several top breaking-news picks each generation cycle
+- `BREAKING_STORY_LIMIT=6` controls how many fresh stories get expanded into multiple draft angles
 
-The default feeds are Google News top stories, business, and technology for the United States. You can change those in [src/config.ts](/Users/boat/Documents/New project/x-autopilot/src/config.ts:1).
+You can also hit `/api/breaking` from the dashboard to generate a bigger batch of breaking-news drafts on demand. It now returns multiple angles per story, including `fast-take`, `why-it-matters`, `contrarian-angle`, `prediction`, and `creator-angle`, then queues the strongest picks automatically.
+
+The default feeds are Google News top stories, business, technology, world, and entertainment for the United States. You can change those in [src/config.ts](/Users/boat/Documents/New project/x-autopilot/src/config.ts:1).
 
 Trend posts are intentionally phrased as sourced reactions, not as independent factual reporting. They quote the headline and source, then add a brief take aligned with the account niche.
 

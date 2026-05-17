@@ -45,11 +45,11 @@ export function createTrendQueueItems(stories: TrendStory[], limit: number, offs
   return generated.filter(passesQualityFilter);
 }
 
-type BreakingDraft = {
+export type BreakingDraft = {
   id: string;
   source: "trend";
   mode: "breaking";
-  draftType: "fast-take" | "why-it-matters" | "contrarian-angle";
+  draftType: "fast-take" | "why-it-matters" | "contrarian-angle" | "prediction" | "creator-angle";
   headline: string;
   storyUrl: string;
   storySource: string;
@@ -66,6 +66,7 @@ function buildBreakingText(
 ): string {
   const proof = pickOne(persona.socialProofTemplates, seed + 1);
   const hook = pickOne(persona.trendHooks, seed + 2);
+  const transformation = pickOne(persona.transformations, seed + 3);
 
   if (draftType === "fast-take") {
     return truncateForX(
@@ -79,13 +80,31 @@ function buildBreakingText(
     );
   }
 
+  if (draftType === "prediction") {
+    return truncateForX(
+      `Prediction:\n${story.headline}\n\nThe next wave of posts will repeat the news. The winners will explain what changes next and who benefits first.\n\nSource: ${story.source}`
+    );
+  }
+
+  if (draftType === "creator-angle") {
+    return truncateForX(
+      `Creator angle:\n${story.headline}\n\nBest move: ${transformation} before the topic gets saturated.\n\nSource: ${story.source}`
+    );
+  }
+
   return truncateForX(
     `Contrarian take:\nMost people will repeat the headline. Better post: explain the second-order effect.\n\n${story.headline}\n\nSource: ${story.source}`
   );
 }
 
 export function createBreakingDrafts(stories: TrendStory[], storyLimit = 5): BreakingDraft[] {
-  const draftTypes: BreakingDraft["draftType"][] = ["fast-take", "why-it-matters", "contrarian-angle"];
+  const draftTypes: BreakingDraft["draftType"][] = [
+    "fast-take",
+    "why-it-matters",
+    "contrarian-angle",
+    "prediction",
+    "creator-angle"
+  ];
   const drafts: BreakingDraft[] = [];
 
   stories.slice(0, storyLimit).forEach((story, storyIndex) => {
@@ -128,4 +147,32 @@ export function createBreakingDrafts(stories: TrendStory[], storyLimit = 5): Bre
   });
 
   return drafts.sort((a, b) => b.predictedScore - a.predictedScore || a.visibilityRisk - b.visibilityRisk);
+}
+
+export function createBreakingQueueItems(stories: TrendStory[], storyLimit = 5): QueueItem[] {
+  return createBreakingDrafts(stories, storyLimit).map((draft) => {
+    const scored = scorePost(draft.text, false);
+
+    return {
+      id: draft.id,
+      createdAt: new Date().toISOString(),
+      source: "trend",
+      mode: "breaking",
+      draftType: draft.draftType,
+      pillar: "opinion",
+      format: "proof",
+      topicCluster: draft.topicCluster,
+      text: draft.text,
+      predictedScore: draft.predictedScore,
+      visibilityRisk: draft.visibilityRisk,
+      prediction: scored.prediction,
+      experimentTag: `breaking-${draft.draftType}-${slugify(draft.topicCluster)}`,
+      trendRef: {
+        headline: draft.headline,
+        source: draft.storySource,
+        url: draft.storyUrl
+      },
+      status: "queued"
+    };
+  });
 }

@@ -361,7 +361,9 @@
           queueTarget: 14,
           postsPerRun: 1,
           trendPostsPerRun: 1,
-          trendAutoPost: false
+          trendAutoPost: false,
+          breakingPostsPerRun: 3,
+          breakingStoryLimit: 6
         },
         summary: {
           queued: 2,
@@ -373,13 +375,14 @@
         nextUp: [
           {
             source: "trend",
+            mode: "breaking",
             experimentTag: "trend-proof-technology",
             draftType: "fast-take",
             visibilityRisk: 12,
             predictedScore: 38,
             topicCluster: "technology",
             text: "Big story today: Apple upgrades Genmoji with automatic suggestions.\n\nTake: specific product changes spread because they are instantly legible.",
-            trendRef: { source: "Google News Technology US" }
+            trendRef: { source: "Google News Technology US", url: "#" }
           },
           {
             source: "evergreen",
@@ -450,7 +453,7 @@
         `).join("");
 
         document.getElementById("runtime").textContent =
-          `dry run ${runtime.dryRun ? "on" : "off"} · trend auto ${runtime.trendAutoPost ? "on" : "off"}`;
+          `dry run ${runtime.dryRun ? "on" : "off"} · trend auto ${runtime.trendAutoPost ? "on" : "off"} · breaking ${runtime.breakingPostsPerRun || 0}/run`;
       }
 
       function copyText(text) {
@@ -478,6 +481,7 @@
             </div>
             <div class="item-actions">
               <button class="button small copy-button" data-copy="${escapeHtml(item.text)}">Copy post</button>
+              ${item.trendRef?.url ? `<a class="button small" href="${escapeHtml(item.trendRef.url)}" target="_blank" rel="noreferrer">Open source</a>` : ""}
             </div>
           </article>
         `).join("") || '<article class="item"><div class="meta">No posts in this filter.</div></article>';
@@ -610,16 +614,16 @@
           const payload = await safeJson("/api/breaking", { method: "GET" });
           const nextState = {
             ...dashboardState,
-            nextUp: payload.drafts,
+            nextUp: payload.queued?.length ? payload.queued : payload.drafts,
             summary: {
               ...dashboardState.summary,
-              queued: payload.drafts.length,
+              queued: payload.queued?.length || payload.drafts.length,
               trends: payload.stories.length
             },
             updatedAt: new Date().toISOString()
           };
           render(nextState);
-          setNotice(`Generated ${payload.generatedCount} breaking-news drafts.`, "success");
+          setNotice(`Generated ${payload.generatedCount} breaking-news drafts and queued ${payload.queuedCount || 0} top picks.`, "success");
         } catch (error) {
           setNotice(error.message || "Generate failed.", "error");
         } finally {

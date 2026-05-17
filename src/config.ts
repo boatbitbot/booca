@@ -81,6 +81,16 @@ export const persona: PersonaConfig = {
       name: "Google News Technology US",
       url: "https://news.google.com/rss/headlines/section/topic/TECHNOLOGY?hl=en-US&gl=US&ceid=US:en",
       category: "technology"
+    },
+    {
+      name: "Google News World US",
+      url: "https://news.google.com/rss/headlines/section/topic/WORLD?hl=en-US&gl=US&ceid=US:en",
+      category: "world"
+    },
+    {
+      name: "Google News Entertainment US",
+      url: "https://news.google.com/rss/headlines/section/topic/ENTERTAINMENT?hl=en-US&gl=US&ceid=US:en",
+      category: "entertainment"
     }
   ],
   trendHooks: [
@@ -116,5 +126,7 @@ export const runtime: RuntimeConfig = {
   queueTarget: Number.parseInt(process.env.QUEUE_TARGET ?? "14", 10),
   postsPerRun: Number.parseInt(process.env.POSTS_PER_RUN ?? "1", 10),
   trendPostsPerRun: Number.parseInt(process.env.TREND_POSTS_PER_RUN ?? "1", 10),
-  trendAutoPost: process.env.TREND_AUTO_POST === "true"
+  trendAutoPost: process.env.TREND_AUTO_POST === "true",
+  breakingPostsPerRun: Number.parseInt(process.env.BREAKING_POSTS_PER_RUN ?? "3", 10),
+  breakingStoryLimit: Number.parseInt(process.env.BREAKING_STORY_LIMIT ?? "6", 10)
 };

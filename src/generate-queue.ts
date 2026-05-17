@@ -3,7 +3,7 @@ import { pathToFileURL } from "node:url";
 
 import { runtime } from "./config.js";
 import { generateQueueItems } from "./lib/content-engine.js";
-import { createTrendQueueItems } from "./lib/trend-content.js";
+import { createBreakingQueueItems, createTrendQueueItems } from "./lib/trend-content.js";
 import { optimizeQueueOrder, readQueue, writeQueue } from "./lib/queue-store.js";
 import { readTrends } from "./lib/trend-store.js";
 import type { QueueItem } from "./types.js";
@@ -15,12 +15,19 @@ export async function generateQueue(): Promise<QueueItem[]> {
 
   const trends = await readTrends();
   const existingTrendIds = new Set(queue.filter((item) => item.source === "trend").map((item) => item.id));
-  const trendQueue = createTrendQueueItems(trends, runtime.trendPostsPerRun, queue.length).filter(
+  const breakingQueue = createBreakingQueueItems(trends, runtime.breakingStoryLimit)
+    .slice(0, runtime.breakingPostsPerRun)
+    .filter((item) => !existingTrendIds.has(item.id));
+  const trendQueue = createTrendQueueItems(trends, runtime.trendPostsPerRun, queue.length + breakingQueue.length).filter(
     (item) => !existingTrendIds.has(item.id)
   );
-  const trendReserve = trendQueue.length > 0 ? 1 : 0;
+  const trendReserve = breakingQueue.length + trendQueue.length;
   const evergreenSlots = Math.max(toCreate - trendReserve, 0);
-  const generated = [...trendQueue, ...generateQueueItems(evergreenSlots, queue.length + trendQueue.length)];
+  const generated = [
+    ...breakingQueue,
+    ...trendQueue,
+    ...generateQueueItems(evergreenSlots, queue.length + breakingQueue.length + trendQueue.length)
+  ];
 
   if (toCreate === 0 && generated.length === 0) {
     console.log(`Queue already has ${queuedCount} queued posts.`);
