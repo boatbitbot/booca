@@ -4,6 +4,18 @@ import { persona, runtime } from "../src/config.js";
 import { readPerformance } from "../src/lib/performance-store.js";
 import { optimizeQueueOrder, readQueue } from "../src/lib/queue-store.js";
 import { readTrends } from "../src/lib/trend-store.js";
+import type { QueueItem } from "../src/types.js";
+
+function normalizeQueueItem(item: QueueItem): QueueItem {
+  return {
+    ...item,
+    source: item.source ?? "evergreen",
+    topicCluster: item.topicCluster ?? "general",
+    predictedScore: item.predictedScore ?? 0,
+    visibilityRisk: item.visibilityRisk ?? 0,
+    experimentTag: item.experimentTag ?? item.pillar ?? "queue"
+  };
+}
 
 export default async function handler(_req: VercelRequest, res: VercelResponse): Promise<void> {
   const [queue, trends, performance] = await Promise.all([
@@ -12,7 +24,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse):
     readPerformance()
   ]);
 
-  const orderedQueue = optimizeQueueOrder(queue);
+  const orderedQueue = optimizeQueueOrder(queue.map(normalizeQueueItem));
   const queued = orderedQueue.filter((item) => item.status === "queued");
   const posted = orderedQueue.filter((item) => item.status === "posted");
   const queuedTrend = queued.filter((item) => item.source === "trend");

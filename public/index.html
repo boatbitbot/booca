@@ -387,6 +387,78 @@
     <script>
       let dashboardState = null;
       let currentFilter = "all";
+      const isFileMode = window.location.protocol === "file:";
+
+      const localPreviewState = {
+        updatedAt: new Date().toISOString(),
+        brand: {
+          name: "SignalMint AI",
+          handle: "@signalmintai",
+          niche: "turning creator knowledge into tiny digital products and affiliate revenue",
+          audience: "solo creators building products from attention",
+          disclosure: "Local preview mode. API routes are unavailable on file:// URLs.",
+          growthGoal: "preview the frontend locally, then deploy for live queue and trend data"
+        },
+        runtime: {
+          dryRun: true,
+          queueTarget: 14,
+          postsPerRun: 1,
+          trendPostsPerRun: 1,
+          trendAutoPost: false
+        },
+        summary: {
+          queued: 2,
+          posted: 1,
+          trends: 2,
+          performanceRecords: 0,
+          queuedTrend: 1,
+          queuedEvergreen: 1
+        },
+        nextUp: [
+          {
+            source: "trend",
+            experimentTag: "trend-proof-technology",
+            visibilityRisk: 12,
+            predictedScore: 38,
+            topicCluster: "technology",
+            text: "Big story today: Apple upgrades Genmoji with automatic suggestions.\n\nTake: specific product changes spread because they are instantly legible.",
+            trendRef: {
+              source: "Google News Technology US"
+            }
+          },
+          {
+            source: "evergreen",
+            experimentTag: "opinion-contrarian-offer",
+            visibilityRisk: 8,
+            predictedScore: 27,
+            topicCluster: "offer design",
+            text: "Unpopular opinion: small accounts do not need more ideas. They need one offer the audience can repeat back in a sentence."
+          }
+        ],
+        recentPosted: [
+          {
+            source: "evergreen",
+            text: "Simple growth framework: Hook -> pain -> proof -> CTA.",
+            postedAt: new Date(Date.now() - 1000 * 60 * 50).toISOString()
+          }
+        ],
+        topTrends: [
+          {
+            headline: "Apple upgrades Genmoji with automatic suggestions",
+            source: "Google News Technology US",
+            category: "technology",
+            trendScore: 86,
+            url: "#"
+          },
+          {
+            headline: "Bond yield spike worries equities market",
+            source: "Google News Business US",
+            category: "business",
+            trendScore: 81,
+            url: "#"
+          }
+        ]
+      };
 
       function escapeHtml(value) {
         return String(value)
@@ -401,6 +473,16 @@
         const node = document.getElementById("actionStatus");
         node.className = `notice${mode === "neutral" ? "" : ` ${mode}`}`;
         node.textContent = message;
+      }
+
+      function applyRuntimeGuards() {
+        if (!isFileMode) {
+          return;
+        }
+
+        document.getElementById("runCycle").disabled = true;
+        document.getElementById("saveSecret").disabled = true;
+        document.getElementById("secret").disabled = true;
       }
 
       function renderQueue(items) {
@@ -476,8 +558,16 @@
       }
 
       async function load() {
-        const res = await fetch("/api/status", { cache: "no-store" });
-        const data = await res.json();
+        let data;
+
+        if (isFileMode) {
+          data = localPreviewState;
+          setActionStatus("Local preview mode: open the deployed Vercel URL to use live API data and manual controls.", "success");
+        } else {
+          const res = await fetch("/api/status", { cache: "no-store" });
+          data = await res.json();
+        }
+
         dashboardState = data;
 
         document.getElementById("brand").textContent = `${data.brand.name} ${data.brand.handle}`;
@@ -515,6 +605,11 @@
       }
 
       async function runCycleNow() {
+        if (isFileMode) {
+          setActionStatus("Run cycle is unavailable in file preview mode. Use the deployed app or a local server.", "error");
+          return;
+        }
+
         const button = document.getElementById("runCycle");
         const secret = document.getElementById("secret").value.trim();
         button.disabled = true;
@@ -549,6 +644,11 @@
       }
 
       document.getElementById("saveSecret").addEventListener("click", () => {
+        if (isFileMode) {
+          setActionStatus("Secret storage is disabled in file preview mode.", "error");
+          return;
+        }
+
         localStorage.setItem("x-autopilot-secret", document.getElementById("secret").value.trim());
         setActionStatus("Secret saved in this browser.", "success");
       });
@@ -556,6 +656,7 @@
       document.getElementById("refresh").addEventListener("click", load);
       document.getElementById("runCycle").addEventListener("click", runCycleNow);
       bindFilters();
+      applyRuntimeGuards();
       loadSavedSecret();
       load().catch((error) => {
         document.getElementById("niche").textContent = error.message;
