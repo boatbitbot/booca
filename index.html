@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SignalMint AI Dashboard</title>
+    <style>
+      :root {
+        --bg: #f7f3ea;
+        --panel: rgba(255, 251, 245, 0.88);
+        --ink: #1f2220;
+        --muted: #6d716d;
+        --line: rgba(31, 34, 32, 0.1);
+        --accent: #0d8b6f;
+        --accent-2: #ef7d45;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Georgia, "Iowan Old Style", serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(13, 139, 111, 0.15), transparent 28%),
+          radial-gradient(circle at top right, rgba(239, 125, 69, 0.14), transparent 24%),
+          linear-gradient(180deg, #fbf8f1 0%, var(--bg) 100%);
+      }
+      .shell {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 40px 20px 80px;
+      }
+      .hero {
+        display: grid;
+        grid-template-columns: 1.3fr 0.9fr;
+        gap: 24px;
+        align-items: start;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 24px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 20px 50px rgba(31, 34, 32, 0.06);
+      }
+      h1, h2, h3, p { margin: 0; }
+      h1 {
+        font-size: clamp(2.3rem, 6vw, 4.8rem);
+        line-height: 0.95;
+        letter-spacing: -0.05em;
+      }
+      .sub {
+        margin-top: 16px;
+        color: var(--muted);
+        font-size: 1.05rem;
+        max-width: 55ch;
+        line-height: 1.5;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 20px;
+      }
+      .stat {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.45);
+      }
+      .label {
+        display: block;
+        color: var(--muted);
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .value {
+        display: block;
+        margin-top: 6px;
+        font-size: 2rem;
+        font-weight: 700;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-top: 24px;
+      }
+      .item {
+        padding: 16px 0;
+        border-top: 1px solid var(--line);
+      }
+      .item:first-child { border-top: 0; padding-top: 0; }
+      .eyebrow {
+        color: var(--accent);
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .text {
+        margin-top: 8px;
+        line-height: 1.45;
+      }
+      .meta {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      .pill {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: rgba(13, 139, 111, 0.12);
+        color: var(--accent);
+        font-size: 0.8rem;
+        margin-right: 8px;
+        margin-top: 10px;
+      }
+      .button {
+        appearance: none;
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 18px;
+        background: linear-gradient(135deg, var(--accent), #0f635d);
+        color: white;
+        font: inherit;
+        cursor: pointer;
+      }
+      .button.secondary {
+        background: white;
+        color: var(--ink);
+        border: 1px solid var(--line);
+      }
+      .actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      @media (max-width: 900px) {
+        .hero, .grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div class="card">
+          <div class="eyebrow">X Autopilot</div>
+          <h1 id="brand">Loading…</h1>
+          <p class="sub" id="niche">Fetching deployment status.</p>
+          <div class="actions">
+            <button class="button" id="refresh">Refresh</button>
+            <a class="button secondary" href="/api/queue" target="_blank" rel="noreferrer">Raw queue JSON</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="eyebrow">Runtime</div>
+          <div class="stats" id="stats"></div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <div class="eyebrow">Next Up</div>
+          <div id="queue"></div>
+        </div>
+        <div class="card">
+          <div class="eyebrow">Top Trends</div>
+          <div id="trends"></div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      async function load() {
+        const res = await fetch('/api/status', { cache: 'no-store' });
+        const data = await res.json();
+
+        document.getElementById('brand').textContent = `${data.brand.name} ${data.brand.handle}`;
+        document.getElementById('niche').textContent = data.brand.niche;
+
+        const stats = [
+          ['Queued posts', data.summary.queued],
+          ['Posted', data.summary.posted],
+          ['Trend stories', data.summary.trends],
+          ['Dry run', data.runtime.dryRun ? 'Yes' : 'No']
+        ];
+
+        document.getElementById('stats').innerHTML = stats.map(([label, value]) => `
+          <div class="stat">
+            <span class="label">${label}</span>
+            <span class="value">${value}</span>
+          </div>
+        `).join('');
+
+        document.getElementById('queue').innerHTML = data.nextUp.map((item) => `
+          <article class="item">
+            <div>
+              <span class="pill">${item.source}</span>
+              <span class="pill">${item.experimentTag}</span>
+            </div>
+            <p class="text">${item.text}</p>
+            <p class="meta">Predicted ${item.predictedScore} · Risk ${item.visibilityRisk ?? 'n/a'}</p>
+          </article>
+        `).join('');
+
+        document.getElementById('trends').innerHTML = data.topTrends.map((story) => `
+          <article class="item">
+            <p class="text">${story.headline}</p>
+            <p class="meta">${story.source} · ${story.category} · score ${story.trendScore}</p>
+          </article>
+        `).join('');
+      }
+
+      document.getElementById('refresh').addEventListener('click', load);
+      load().catch((error) => {
+        document.getElementById('niche').textContent = error.message;
+      });
+    </script>
+  </body>
+  </html>

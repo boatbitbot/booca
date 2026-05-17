@@ -1,0 +1,27 @@
+{
+  "name": "x-autopilot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "fetch-trends": "tsx src/fetch-trends.ts",
+    "generate": "tsx src/generate-queue.ts",
+    "leaderboard": "tsx src/leaderboard.ts",
+    "post-next": "tsx src/post-next.ts",
+    "run-cycle": "tsx src/index.ts",
+    "test": "node --import tsx --test tests/**/*.test.ts"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.0.0",
+    "dotenv": "^16.6.1",
+    "twitter-api-v2": "^1.28.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "@vercel/node": "^5.3.25",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
