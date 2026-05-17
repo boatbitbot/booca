@@ -6,16 +6,14 @@
     <title>SignalMint AI</title>
     <style>
       :root {
-        --bg: #000000;
-        --panel: #111214;
-        --panel-soft: #16181c;
+        --bg: #000;
+        --panel: #16181c;
         --line: #2f3336;
         --text: #e7e9ea;
         --muted: #71767b;
-        --accent: #1d9bf0;
-        --accent-soft: rgba(29, 155, 240, 0.12);
-        --trend: #00ba7c;
-        --risk: #f4212e;
+        --blue: #1d9bf0;
+        --green: #00ba7c;
+        --red: #f4212e;
       }
 
       * {
@@ -34,35 +32,34 @@
         text-decoration: none;
       }
 
-      .app {
-        max-width: 1100px;
+      .shell {
+        max-width: 980px;
         margin: 0 auto;
-        padding: 0 16px 40px;
+        padding: 0 16px 32px;
       }
 
       .topbar {
         position: sticky;
         top: 0;
-        z-index: 5;
+        z-index: 10;
+        background: rgba(0, 0, 0, 0.88);
         backdrop-filter: blur(12px);
-        background: rgba(0, 0, 0, 0.82);
         border-bottom: 1px solid var(--line);
       }
 
       .topbar-inner {
-        max-width: 1100px;
+        max-width: 980px;
         margin: 0 auto;
         padding: 14px 16px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
       }
 
       .brand {
         display: flex;
         flex-direction: column;
-        gap: 2px;
       }
 
       .brand strong {
@@ -75,140 +72,119 @@
         font-size: 13px;
       }
 
-      .top-actions {
+      .actions {
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
-        justify-content: flex-end;
-      }
-
-      .button,
-      .input {
-        border-radius: 999px;
-        font: inherit;
       }
 
       .button {
         border: 1px solid var(--line);
+        border-radius: 999px;
         background: transparent;
         color: var(--text);
         padding: 10px 16px;
+        font: inherit;
         cursor: pointer;
       }
 
       .button.primary {
-        background: var(--text);
-        color: #000;
-        border-color: var(--text);
-        font-weight: 700;
-      }
-
-      .button.blue {
-        background: var(--accent);
-        border-color: var(--accent);
+        background: var(--blue);
+        border-color: var(--blue);
         color: white;
         font-weight: 700;
       }
 
       .button:disabled {
-        opacity: 0.6;
-        cursor: wait;
-      }
-
-      .input {
-        border: 1px solid var(--line);
-        background: var(--bg);
-        color: var(--text);
-        padding: 10px 14px;
-        min-width: 240px;
+        opacity: 0.55;
+        cursor: not-allowed;
       }
 
       .layout {
         display: grid;
-        grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.9fr);
-        gap: 24px;
+        grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.85fr);
+        gap: 18px;
         margin-top: 16px;
       }
 
       .panel {
         background: var(--panel);
         border: 1px solid var(--line);
-        border-radius: 20px;
+        border-radius: 18px;
         overflow: hidden;
       }
 
       .panel-head {
-        padding: 18px 18px 14px;
+        padding: 16px;
         border-bottom: 1px solid var(--line);
       }
 
-      .panel-title {
+      .title {
         font-size: 20px;
         font-weight: 800;
       }
 
-      .panel-sub {
+      .sub {
         margin-top: 4px;
         color: var(--muted);
         font-size: 14px;
       }
 
-      .stats {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .stat {
-        padding: 16px 18px;
-        border-right: 1px solid var(--line);
-        border-bottom: 1px solid var(--line);
-      }
-
-      .stat:nth-child(2n) {
-        border-right: 0;
-      }
-
-      .stat-label {
-        color: var(--muted);
-        font-size: 13px;
-      }
-
-      .stat-value {
-        margin-top: 6px;
-        font-size: 26px;
-        font-weight: 800;
-      }
-
       .notice {
-        margin: 16px 18px 0;
+        margin: 16px;
         padding: 12px 14px;
         border: 1px solid var(--line);
         border-radius: 14px;
         color: var(--muted);
-        background: var(--panel-soft);
       }
 
       .notice.success {
-        color: var(--trend);
+        color: var(--green);
       }
 
       .notice.error {
         color: #ff6b72;
       }
 
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border-bottom: 1px solid var(--line);
+      }
+
+      .stat {
+        padding: 14px 16px;
+        border-right: 1px solid var(--line);
+      }
+
+      .stat:last-child {
+        border-right: 0;
+      }
+
+      .stat-label {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .stat-value {
+        margin-top: 6px;
+        font-size: 24px;
+        font-weight: 800;
+      }
+
       .toolbar {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         flex-wrap: wrap;
-        padding: 16px 18px;
+        padding: 14px 16px;
         border-bottom: 1px solid var(--line);
       }
 
       .toggle {
         border: 1px solid var(--line);
+        border-radius: 999px;
         background: transparent;
         color: var(--muted);
-        border-radius: 999px;
         padding: 8px 12px;
         font: inherit;
         cursor: pointer;
@@ -217,49 +193,42 @@
       .toggle.active {
         color: var(--text);
         border-color: var(--text);
-        background: rgba(231, 233, 234, 0.08);
       }
 
-      .feed-item {
-        padding: 16px 18px;
+      .item {
+        padding: 16px;
         border-top: 1px solid var(--line);
       }
 
-      .feed-item:first-child {
+      .item:first-child {
         border-top: 0;
       }
 
       .chips {
         display: flex;
-        flex-wrap: wrap;
         gap: 8px;
+        flex-wrap: wrap;
       }
 
       .chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 10px;
         border-radius: 999px;
-        background: var(--panel-soft);
+        padding: 4px 10px;
+        background: rgba(255, 255, 255, 0.06);
         color: var(--muted);
         font-size: 12px;
       }
 
       .chip.trend {
-        color: var(--trend);
-        background: rgba(0, 186, 124, 0.12);
+        color: var(--green);
       }
 
       .chip.risk {
-        color: var(--risk);
-        background: rgba(244, 33, 46, 0.1);
+        color: var(--red);
       }
 
       .tweet {
         margin-top: 10px;
         white-space: pre-wrap;
-        font-size: 15px;
       }
 
       .meta {
@@ -270,56 +239,37 @@
 
       .right-stack {
         display: grid;
-        gap: 16px;
-      }
-
-      .mini-list .feed-item {
-        padding: 14px 16px;
-      }
-
-      .mini-title {
-        font-weight: 700;
-        font-size: 15px;
+        gap: 18px;
       }
 
       .footer {
-        padding: 16px 18px;
+        padding: 14px 16px;
+        border-top: 1px solid var(--line);
         color: var(--muted);
         font-size: 13px;
-        border-top: 1px solid var(--line);
       }
 
-      @media (max-width: 920px) {
+      @media (max-width: 900px) {
         .layout {
           grid-template-columns: 1fr;
         }
 
         .topbar-inner {
-          align-items: flex-start;
           flex-direction: column;
+          align-items: flex-start;
         }
 
-        .top-actions {
-          width: 100%;
-          justify-content: flex-start;
-        }
-
-        .stats {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-
-      @media (max-width: 640px) {
         .stats {
           grid-template-columns: 1fr;
         }
 
         .stat {
           border-right: 0;
+          border-bottom: 1px solid var(--line);
         }
 
-        .input {
-          min-width: 100%;
+        .stat:last-child {
+          border-bottom: 0;
         }
       }
     </style>
@@ -328,23 +278,22 @@
     <header class="topbar">
       <div class="topbar-inner">
         <div class="brand">
-          <strong id="brand">Loading…</strong>
-          <span id="niche">Connecting to dashboard…</span>
+          <strong id="brand">SignalMint AI @signalmintai</strong>
+          <span id="niche">turning creator knowledge into tiny digital products and affiliate revenue</span>
         </div>
-        <div class="top-actions">
+        <div class="actions">
           <button class="button" id="refresh">Refresh</button>
-          <button class="button blue" id="runCycle">Run cycle</button>
-          <a class="button" href="/api/queue" target="_blank" rel="noreferrer">Queue JSON</a>
+          <button class="button primary" id="runCycle">Run cycle</button>
         </div>
       </div>
     </header>
 
-    <main class="app">
+    <main class="shell">
       <section class="layout">
         <section class="panel">
           <div class="panel-head">
-            <div class="panel-title">Control center</div>
-            <div class="panel-sub" id="audience"></div>
+            <div class="title">Queue</div>
+            <div class="sub" id="subtitle">Preview mode until live API data is available.</div>
           </div>
 
           <div class="stats" id="stats"></div>
@@ -353,30 +302,28 @@
             <button class="toggle active" data-filter="all">All</button>
             <button class="toggle" data-filter="trend">Trend</button>
             <button class="toggle" data-filter="evergreen">Evergreen</button>
-            <input class="input" id="secret" type="password" placeholder="CRON_SECRET for manual run" />
-            <button class="button" id="saveSecret">Save secret</button>
           </div>
 
-          <div class="notice" id="actionStatus">Ready. Refresh to pull the latest queue and trend state.</div>
+          <div class="notice success" id="notice">Loading dashboard…</div>
 
           <div id="queue"></div>
 
-          <div class="footer" id="updatedAt"></div>
+          <div class="footer" id="footer">Waiting for state…</div>
         </section>
 
         <aside class="right-stack">
-          <section class="panel mini-list">
+          <section class="panel">
             <div class="panel-head">
-              <div class="panel-title">Top trends</div>
-              <div class="panel-sub" id="goal"></div>
+              <div class="title">Top trends</div>
+              <div class="sub">Daily stories the bot can react to</div>
             </div>
             <div id="trends"></div>
           </section>
 
-          <section class="panel mini-list">
+          <section class="panel">
             <div class="panel-head">
-              <div class="panel-title">Recently posted</div>
-              <div class="panel-sub" id="runtimeDetails"></div>
+              <div class="title">Recently posted</div>
+              <div class="sub" id="runtime">dry run on</div>
             </div>
             <div id="recent"></div>
           </section>
@@ -385,20 +332,16 @@
     </main>
 
     <script>
-      let dashboardState = null;
-      let currentFilter = "all";
-      const isFileMode = window.location.protocol === "file:";
-      let previewModeActive = isFileMode;
-
-      const localPreviewState = {
+      const fallbackState = {
+        ok: true,
         updatedAt: new Date().toISOString(),
         brand: {
           name: "SignalMint AI",
           handle: "@signalmintai",
           niche: "turning creator knowledge into tiny digital products and affiliate revenue",
           audience: "solo creators building products from attention",
-          disclosure: "Local preview mode. API routes are unavailable on file:// URLs.",
-          growthGoal: "preview the frontend locally, then deploy for live queue and trend data"
+          disclosure: "Preview mode",
+          growthGoal: "show a stable frontend first, then hydrate with live API data when available"
         },
         runtime: {
           dryRun: true,
@@ -411,7 +354,6 @@
           queued: 2,
           posted: 1,
           trends: 2,
-          performanceRecords: 0,
           queuedTrend: 1,
           queuedEvergreen: 1
         },
@@ -423,9 +365,7 @@
             predictedScore: 38,
             topicCluster: "technology",
             text: "Big story today: Apple upgrades Genmoji with automatic suggestions.\n\nTake: specific product changes spread because they are instantly legible.",
-            trendRef: {
-              source: "Google News Technology US"
-            }
+            trendRef: { source: "Google News Technology US" }
           },
           {
             source: "evergreen",
@@ -440,7 +380,7 @@
           {
             source: "evergreen",
             text: "Simple growth framework: Hook -> pain -> proof -> CTA.",
-            postedAt: new Date(Date.now() - 1000 * 60 * 50).toISOString()
+            postedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString()
           }
         ],
         topTrends: [
@@ -461,8 +401,12 @@
         ]
       };
 
+      let currentFilter = "all";
+      let previewMode = true;
+      let dashboardState = fallbackState;
+
       function escapeHtml(value) {
-        return String(value)
+        return String(value ?? "")
           .replaceAll("&", "&amp;")
           .replaceAll("<", "&lt;")
           .replaceAll(">", "&gt;")
@@ -470,240 +414,172 @@
           .replaceAll("'", "&#39;");
       }
 
-      function setActionStatus(message, mode = "neutral") {
-        const node = document.getElementById("actionStatus");
-        node.className = `notice${mode === "neutral" ? "" : ` ${mode}`}`;
+      function setNotice(message, mode = "success") {
+        const node = document.getElementById("notice");
+        node.className = `notice ${mode}`;
         node.textContent = message;
       }
 
-      async function readJsonResponse(response) {
-        const raw = await response.text();
+      function renderStats(summary, runtime) {
+        const stats = [
+          ["Queued", summary.queued],
+          ["Posted", summary.posted],
+          ["Trends", summary.trends]
+        ];
 
-        try {
-          return JSON.parse(raw);
-        } catch {
-          const trimmed = raw.trim();
-          throw new Error(trimmed || `Request failed with status ${response.status}`);
-        }
-      }
+        document.getElementById("stats").innerHTML = stats.map(([label, value]) => `
+          <div class="stat">
+            <div class="stat-label">${label}</div>
+            <div class="stat-value">${escapeHtml(value)}</div>
+          </div>
+        `).join("");
 
-      function applyRuntimeGuards() {
-        if (!previewModeActive) {
-          return;
-        }
-
-        document.getElementById("runCycle").disabled = true;
-        document.getElementById("saveSecret").disabled = true;
-        document.getElementById("secret").disabled = true;
-      }
-
-      function clearRuntimeGuards() {
-        if (previewModeActive) {
-          return;
-        }
-
-        document.getElementById("runCycle").disabled = false;
-        document.getElementById("saveSecret").disabled = false;
-        document.getElementById("secret").disabled = false;
+        document.getElementById("runtime").textContent =
+          `dry run ${runtime.dryRun ? "on" : "off"} · trend auto ${runtime.trendAutoPost ? "on" : "off"}`;
       }
 
       function renderQueue(items) {
         const visible = items.filter((item) => currentFilter === "all" || item.source === currentFilter);
-        document.getElementById("queue").innerHTML =
-          visible
-            .map(
-              (item) => `
-          <article class="feed-item">
+        document.getElementById("queue").innerHTML = visible.map((item) => `
+          <article class="item">
             <div class="chips">
-              <span class="chip ${item.source === "trend" ? "trend" : ""}">${escapeHtml(item.source || "legacy")}</span>
-              <span class="chip">${escapeHtml(item.experimentTag || item.pillar || "queue")}</span>
-              ${item.visibilityRisk != null ? `<span class="chip risk">risk ${escapeHtml(item.visibilityRisk)}</span>` : ""}
+              <span class="chip ${item.source === "trend" ? "trend" : ""}">${escapeHtml(item.source || "evergreen")}</span>
+              <span class="chip">${escapeHtml(item.experimentTag || "queue")}</span>
+              <span class="chip risk">risk ${escapeHtml(item.visibilityRisk ?? 0)}</span>
             </div>
-            <div class="tweet">${escapeHtml(item.text || "")}</div>
+            <div class="tweet">${escapeHtml(item.text)}</div>
             <div class="meta">
-              score ${escapeHtml(item.predictedScore ?? "n/a")}
+              score ${escapeHtml(item.predictedScore ?? 0)}
               ${item.topicCluster ? ` · ${escapeHtml(item.topicCluster)}` : ""}
               ${item.trendRef?.source ? ` · ${escapeHtml(item.trendRef.source)}` : ""}
             </div>
           </article>
-        `
-            )
-            .join("") || '<div class="feed-item"><div class="meta">No posts in this filter.</div></div>';
+        `).join("") || '<article class="item"><div class="meta">No posts in this filter.</div></article>';
       }
 
       function renderTrends(items) {
-        document.getElementById("trends").innerHTML =
-          items
-            .map(
-              (story) => `
-          <article class="feed-item">
-            <a href="${escapeHtml(story.url)}" target="_blank" rel="noreferrer">
-              <div class="mini-title">${escapeHtml(story.headline)}</div>
+        document.getElementById("trends").innerHTML = items.map((story) => `
+          <article class="item">
+            <a href="${escapeHtml(story.url || "#")}" target="_blank" rel="noreferrer">
+              <div>${escapeHtml(story.headline)}</div>
             </a>
-            <div class="meta">
-              ${escapeHtml(story.source)} · ${escapeHtml(story.category)} · ${escapeHtml(story.trendScore)}
-            </div>
+            <div class="meta">${escapeHtml(story.source)} · ${escapeHtml(story.category)} · ${escapeHtml(story.trendScore)}</div>
           </article>
-        `
-            )
-            .join("") || '<div class="feed-item"><div class="meta">No live trends available.</div></div>';
+        `).join("") || '<article class="item"><div class="meta">No trends available.</div></article>';
       }
 
-      function renderPosted(items) {
-        document.getElementById("recent").innerHTML =
-          items
-            .map(
-              (item) => `
-          <article class="feed-item">
+      function renderRecent(items) {
+        document.getElementById("recent").innerHTML = items.map((item) => `
+          <article class="item">
             <div class="chips">
-              <span class="chip ${item.source === "trend" ? "trend" : ""}">${escapeHtml(item.source || "legacy")}</span>
+              <span class="chip ${item.source === "trend" ? "trend" : ""}">${escapeHtml(item.source || "evergreen")}</span>
             </div>
             <div class="tweet">${escapeHtml(item.text || "")}</div>
             <div class="meta">${item.postedAt ? new Date(item.postedAt).toLocaleString() : "posted earlier"}</div>
           </article>
-        `
-            )
-            .join("") || '<div class="feed-item"><div class="meta">No posted history yet.</div></div>';
+        `).join("") || '<article class="item"><div class="meta">No posted history yet.</div></article>';
       }
 
-      function bindFilters() {
-        document.querySelectorAll("[data-filter]").forEach((button) => {
-          button.addEventListener("click", () => {
-            currentFilter = button.dataset.filter;
-            document.querySelectorAll("[data-filter]").forEach((node) => node.classList.remove("active"));
-            button.classList.add("active");
-            if (dashboardState) {
-              renderQueue(dashboardState.nextUp);
-            }
-          });
-        });
+      function render(state) {
+        dashboardState = state;
+        document.getElementById("brand").textContent = `${state.brand.name} ${state.brand.handle}`;
+        document.getElementById("niche").textContent = state.brand.niche;
+        document.getElementById("subtitle").textContent = `${state.brand.audience} · ${state.brand.disclosure}`;
+        document.getElementById("footer").textContent =
+          `Last synced ${new Date(state.updatedAt).toLocaleString()} · queue target ${state.runtime.queueTarget}`;
+        renderStats(state.summary, state.runtime);
+        renderQueue(state.nextUp || []);
+        renderTrends(state.topTrends || []);
+        renderRecent(state.recentPosted || []);
       }
 
-      async function load() {
+      async function safeJson(url, options) {
+        const response = await fetch(url, options);
+        const text = await response.text();
         let data;
 
-        if (isFileMode) {
-          previewModeActive = true;
-          data = localPreviewState;
-          setActionStatus("Local preview mode: open the deployed Vercel URL to use live API data and manual controls.", "success");
-        } else {
-          try {
-            const res = await fetch("/api/status", { cache: "no-store" });
-            data = await readJsonResponse(res);
-            if (!res.ok || data.ok === false) {
-              throw new Error(data.error || "Failed to load dashboard status");
-            }
-            previewModeActive = false;
-          } catch (error) {
-            const isStandaloneHost = ["127.0.0.1", "localhost"].includes(window.location.hostname);
-            if (!isStandaloneHost) {
-              throw error;
-            }
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error(text.trim() || `Request failed with status ${response.status}`);
+        }
 
-            previewModeActive = true;
-            data = localPreviewState;
-            setActionStatus("Static preview detected without API routes. Showing local demo data instead.", "success");
+        if (!response.ok || data.ok === false) {
+          throw new Error(data.error || `Request failed with status ${response.status}`);
+        }
+
+        return data;
+      }
+
+      function updateModeUi() {
+        document.getElementById("runCycle").disabled = previewMode;
+      }
+
+      async function loadLiveIfAvailable() {
+        const hostLooksStaticPreview = window.location.protocol === "file:" || ["127.0.0.1", "localhost"].includes(window.location.hostname);
+
+        if (window.location.protocol === "file:") {
+          previewMode = true;
+          render(fallbackState);
+          setNotice("Local preview mode. This is expected on file:// URLs.", "success");
+          updateModeUi();
+          return;
+        }
+
+        try {
+          const live = await safeJson("/api/status", { cache: "no-store" });
+          previewMode = false;
+          render(live);
+          setNotice("Live API connected.", "success");
+        } catch (error) {
+          previewMode = true;
+          render(fallbackState);
+          if (hostLooksStaticPreview) {
+            setNotice("Static preview detected without API routes. Showing built-in demo data.", "success");
+          } else {
+            setNotice(error.message || "Failed to load dashboard.", "error");
           }
         }
 
-        applyRuntimeGuards();
-        clearRuntimeGuards();
-        dashboardState = data;
-
-        document.getElementById("brand").textContent = `${data.brand.name} ${data.brand.handle}`;
-        document.getElementById("niche").textContent = data.brand.niche;
-        document.getElementById("audience").textContent = `${data.brand.audience} · ${data.brand.disclosure}`;
-        document.getElementById("goal").textContent = data.brand.growthGoal;
-        document.getElementById("runtimeDetails").textContent =
-          `dry run ${data.runtime.dryRun ? "on" : "off"} · posts ${data.runtime.postsPerRun} · trend auto ${data.runtime.trendAutoPost ? "on" : "off"}`;
-        document.getElementById("updatedAt").textContent =
-          `Last synced ${new Date(data.updatedAt).toLocaleString()} · queue target ${data.runtime.queueTarget}`;
-
-        const stats = [
-          ["Queued", data.summary.queued],
-          ["Posted", data.summary.posted],
-          ["Trends", data.summary.trends],
-          ["Dry run", data.runtime.dryRun ? "Yes" : "No"],
-          ["Trend queued", data.summary.queuedTrend],
-          ["Evergreen", data.summary.queuedEvergreen]
-        ];
-
-        document.getElementById("stats").innerHTML = stats
-          .map(
-            ([label, value]) => `
-          <div class="stat">
-            <div class="stat-label">${label}</div>
-            <div class="stat-value">${value}</div>
-          </div>
-        `
-          )
-          .join("");
-
-        renderQueue(data.nextUp);
-        renderTrends(data.topTrends);
-        renderPosted(data.recentPosted);
+        updateModeUi();
       }
 
-      async function runCycleNow() {
-        if (previewModeActive) {
-          setActionStatus("Run cycle is unavailable in file preview mode. Use the deployed app or a local server.", "error");
+      async function runCycle() {
+        if (previewMode) {
+          setNotice("Run cycle is disabled in preview mode.", "error");
           return;
         }
 
         const button = document.getElementById("runCycle");
-        const secret = document.getElementById("secret").value.trim();
         button.disabled = true;
-        setActionStatus("Running cycle…");
+        setNotice("Running cycle…", "success");
 
         try {
-          const url = secret ? `/api/run-cycle?secret=${encodeURIComponent(secret)}` : "/api/run-cycle";
-          const res = await fetch(url, {
-            method: "GET",
-            headers: secret ? { Authorization: `Bearer ${secret}` } : {}
-          });
-          const body = await readJsonResponse(res);
-
-          if (!res.ok || !body.ok) {
-            throw new Error(body.error || "Run cycle failed");
-          }
-
-          setActionStatus("Cycle complete. Refreshing state…", "success");
-          await load();
+          await safeJson("/api/run-cycle", { method: "GET" });
+          await loadLiveIfAvailable();
+          setNotice("Cycle complete.", "success");
         } catch (error) {
-          setActionStatus(error.message || "Run cycle failed.", "error");
+          setNotice(error.message || "Run cycle failed.", "error");
         } finally {
           button.disabled = false;
         }
       }
 
-      function loadSavedSecret() {
-        const saved = localStorage.getItem("x-autopilot-secret");
-        if (saved) {
-          document.getElementById("secret").value = saved;
-        }
-      }
-
-      document.getElementById("saveSecret").addEventListener("click", () => {
-        if (previewModeActive) {
-          setActionStatus("Secret storage is disabled in file preview mode.", "error");
-          return;
-        }
-
-        localStorage.setItem("x-autopilot-secret", document.getElementById("secret").value.trim());
-        setActionStatus("Secret saved in this browser.", "success");
+      document.querySelectorAll("[data-filter]").forEach((button) => {
+        button.addEventListener("click", () => {
+          currentFilter = button.dataset.filter;
+          document.querySelectorAll("[data-filter]").forEach((node) => node.classList.remove("active"));
+          button.classList.add("active");
+          renderQueue(dashboardState.nextUp || []);
+        });
       });
 
-      document.getElementById("refresh").addEventListener("click", load);
-      document.getElementById("runCycle").addEventListener("click", runCycleNow);
-      bindFilters();
-      applyRuntimeGuards();
-      if (!previewModeActive) {
-        loadSavedSecret();
-      }
-      load().catch((error) => {
-        document.getElementById("niche").textContent = error.message;
-        setActionStatus(error.message, "error");
-      });
+      document.getElementById("refresh").addEventListener("click", loadLiveIfAvailable);
+      document.getElementById("runCycle").addEventListener("click", runCycle);
+
+      render(fallbackState);
+      updateModeUi();
+      loadLiveIfAvailable();
     </script>
   </body>
 </html>
