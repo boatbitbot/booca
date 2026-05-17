@@ -388,6 +388,7 @@
       let dashboardState = null;
       let currentFilter = "all";
       const isFileMode = window.location.protocol === "file:";
+      let previewModeActive = isFileMode;
 
       const localPreviewState = {
         updatedAt: new Date().toISOString(),
@@ -487,13 +488,23 @@
       }
 
       function applyRuntimeGuards() {
-        if (!isFileMode) {
+        if (!previewModeActive) {
           return;
         }
 
         document.getElementById("runCycle").disabled = true;
         document.getElementById("saveSecret").disabled = true;
         document.getElementById("secret").disabled = true;
+      }
+
+      function clearRuntimeGuards() {
+        if (previewModeActive) {
+          return;
+        }
+
+        document.getElementById("runCycle").disabled = false;
+        document.getElementById("saveSecret").disabled = false;
+        document.getElementById("secret").disabled = false;
       }
 
       function renderQueue(items) {
@@ -572,16 +583,31 @@
         let data;
 
         if (isFileMode) {
+          previewModeActive = true;
           data = localPreviewState;
           setActionStatus("Local preview mode: open the deployed Vercel URL to use live API data and manual controls.", "success");
         } else {
-          const res = await fetch("/api/status", { cache: "no-store" });
-          data = await readJsonResponse(res);
-          if (!res.ok || data.ok === false) {
-            throw new Error(data.error || "Failed to load dashboard status");
+          try {
+            const res = await fetch("/api/status", { cache: "no-store" });
+            data = await readJsonResponse(res);
+            if (!res.ok || data.ok === false) {
+              throw new Error(data.error || "Failed to load dashboard status");
+            }
+            previewModeActive = false;
+          } catch (error) {
+            const isStandaloneHost = ["127.0.0.1", "localhost"].includes(window.location.hostname);
+            if (!isStandaloneHost) {
+              throw error;
+            }
+
+            previewModeActive = true;
+            data = localPreviewState;
+            setActionStatus("Static preview detected without API routes. Showing local demo data instead.", "success");
           }
         }
 
+        applyRuntimeGuards();
+        clearRuntimeGuards();
         dashboardState = data;
 
         document.getElementById("brand").textContent = `${data.brand.name} ${data.brand.handle}`;
@@ -619,7 +645,7 @@
       }
 
       async function runCycleNow() {
-        if (isFileMode) {
+        if (previewModeActive) {
           setActionStatus("Run cycle is unavailable in file preview mode. Use the deployed app or a local server.", "error");
           return;
         }
@@ -658,7 +684,7 @@
       }
 
       document.getElementById("saveSecret").addEventListener("click", () => {
-        if (isFileMode) {
+        if (previewModeActive) {
           setActionStatus("Secret storage is disabled in file preview mode.", "error");
           return;
         }
@@ -671,7 +697,9 @@
       document.getElementById("runCycle").addEventListener("click", runCycleNow);
       bindFilters();
       applyRuntimeGuards();
-      loadSavedSecret();
+      if (!previewModeActive) {
+        loadSavedSecret();
+      }
       load().catch((error) => {
         document.getElementById("niche").textContent = error.message;
         setActionStatus(error.message, "error");
