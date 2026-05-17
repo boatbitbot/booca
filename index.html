@@ -6,13 +6,18 @@
     <title>SignalMint AI Dashboard</title>
     <style>
       :root {
-        --bg: #f7f3ea;
-        --panel: rgba(255, 251, 245, 0.88);
-        --ink: #1f2220;
-        --muted: #6d716d;
-        --line: rgba(31, 34, 32, 0.1);
-        --accent: #0d8b6f;
-        --accent-2: #ef7d45;
+        --bg: #f3efe4;
+        --panel: rgba(255, 251, 245, 0.82);
+        --panel-strong: #fffdf8;
+        --ink: #18201d;
+        --muted: #66706a;
+        --line: rgba(24, 32, 29, 0.1);
+        --accent: #0c8a6d;
+        --accent-strong: #06624d;
+        --signal: #ef7d45;
+        --signal-soft: rgba(239, 125, 69, 0.15);
+        --success: #157347;
+        --danger: #b54708;
       }
       * { box-sizing: border-box; }
       body {
@@ -20,18 +25,18 @@
         font-family: Georgia, "Iowan Old Style", serif;
         color: var(--ink);
         background:
-          radial-gradient(circle at top left, rgba(13, 139, 111, 0.15), transparent 28%),
-          radial-gradient(circle at top right, rgba(239, 125, 69, 0.14), transparent 24%),
-          linear-gradient(180deg, #fbf8f1 0%, var(--bg) 100%);
+          radial-gradient(circle at top left, rgba(12, 138, 109, 0.16), transparent 24%),
+          radial-gradient(circle at 85% 0%, rgba(239, 125, 69, 0.18), transparent 20%),
+          linear-gradient(180deg, #fcfaf4 0%, var(--bg) 100%);
       }
       .shell {
-        max-width: 1120px;
+        max-width: 1200px;
         margin: 0 auto;
-        padding: 40px 20px 80px;
+        padding: 28px 20px 80px;
       }
       .hero {
         display: grid;
-        grid-template-columns: 1.3fr 0.9fr;
+        grid-template-columns: 1.35fr 0.85fr;
         gap: 24px;
         align-items: start;
       }
@@ -45,15 +50,25 @@
       }
       h1, h2, h3, p { margin: 0; }
       h1 {
-        font-size: clamp(2.3rem, 6vw, 4.8rem);
-        line-height: 0.95;
+        font-size: clamp(2.6rem, 6vw, 5.3rem);
+        line-height: 0.9;
         letter-spacing: -0.05em;
+      }
+      h2 {
+        font-size: 1.45rem;
+        letter-spacing: -0.03em;
       }
       .sub {
         margin-top: 16px;
         color: var(--muted);
         font-size: 1.05rem;
         max-width: 55ch;
+        line-height: 1.5;
+      }
+      .runtime-copy {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 0.96rem;
         line-height: 1.5;
       }
       .stats {
@@ -81,11 +96,26 @@
         font-size: 2rem;
         font-weight: 700;
       }
+      .mini {
+        color: var(--muted);
+        font-size: 0.88rem;
+        margin-top: 4px;
+      }
       .grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 24px;
         margin-top: 24px;
+      }
+      .stack {
+        display: grid;
+        gap: 24px;
+        margin-top: 24px;
+      }
+      .triple {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 1fr;
+        gap: 24px;
       }
       .item {
         padding: 16px 0;
@@ -101,6 +131,7 @@
       .text {
         margin-top: 8px;
         line-height: 1.45;
+        white-space: pre-wrap;
       }
       .meta {
         margin-top: 10px;
@@ -117,20 +148,42 @@
         margin-right: 8px;
         margin-top: 10px;
       }
+      .pill.signal {
+        background: var(--signal-soft);
+        color: var(--signal);
+      }
+      .pill.risk {
+        background: rgba(181, 71, 8, 0.08);
+        color: var(--danger);
+      }
       .button {
         appearance: none;
         border: 0;
         border-radius: 999px;
         padding: 12px 18px;
-        background: linear-gradient(135deg, var(--accent), #0f635d);
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
         color: white;
         font: inherit;
         cursor: pointer;
+        transition: transform 140ms ease, opacity 140ms ease;
+      }
+      .button:hover {
+        transform: translateY(-1px);
       }
       .button.secondary {
         background: white;
         color: var(--ink);
         border: 1px solid var(--line);
+      }
+      .button.ghost {
+        background: transparent;
+        color: var(--ink);
+        border: 1px dashed var(--line);
+      }
+      .button:disabled {
+        opacity: 0.55;
+        cursor: wait;
+        transform: none;
       }
       .actions {
         margin-top: 20px;
@@ -138,8 +191,81 @@
         gap: 10px;
         flex-wrap: wrap;
       }
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 18px;
+      }
+      .input {
+        width: min(320px, 100%);
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.65);
+        color: var(--ink);
+        border-radius: 999px;
+        padding: 12px 16px;
+        font: inherit;
+      }
+      .control-note {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-top: 10px;
+        line-height: 1.45;
+      }
+      .status-banner {
+        margin-top: 14px;
+        border-radius: 18px;
+        padding: 14px 16px;
+        background: rgba(255, 255, 255, 0.55);
+        border: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      .status-banner.success {
+        border-color: rgba(21, 115, 71, 0.22);
+        color: var(--success);
+      }
+      .status-banner.error {
+        border-color: rgba(181, 71, 8, 0.24);
+        color: var(--danger);
+      }
+      .filter-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+      }
+      .toggle {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.55);
+        color: var(--ink);
+        border-radius: 999px;
+        padding: 8px 12px;
+        font: inherit;
+        cursor: pointer;
+      }
+      .toggle.active {
+        background: var(--ink);
+        color: white;
+        border-color: var(--ink);
+      }
+      .trend-link {
+        color: inherit;
+        text-decoration: none;
+      }
+      .trend-link:hover .text {
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+      }
+      .footer-note {
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 0.88rem;
+        line-height: 1.45;
+      }
       @media (max-width: 900px) {
-        .hero, .grid { grid-template-columns: 1fr; }
+        .hero, .grid, .triple { grid-template-columns: 1fr; }
       }
     </style>
   </head>
@@ -150,73 +276,223 @@
           <div class="eyebrow">X Autopilot</div>
           <h1 id="brand">Loading…</h1>
           <p class="sub" id="niche">Fetching deployment status.</p>
+          <p class="runtime-copy" id="audience"></p>
           <div class="actions">
             <button class="button" id="refresh">Refresh</button>
+            <button class="button secondary" id="runCycle">Run Cycle Now</button>
             <a class="button secondary" href="/api/queue" target="_blank" rel="noreferrer">Raw queue JSON</a>
           </div>
+          <div class="toolbar">
+            <input class="input" id="secret" type="password" placeholder="Optional CRON_SECRET for manual run" />
+            <button class="button ghost" id="saveSecret">Save Secret In Browser</button>
+          </div>
+          <p class="control-note">
+            Manual run calls <code>/api/run-cycle</code>. If your deployment uses <code>CRON_SECRET</code>, paste it here once and the dashboard will store it in this browser only.
+          </p>
+          <div class="status-banner" id="actionStatus">Dashboard ready. Refresh to sync the latest queue and trend state.</div>
         </div>
         <div class="card">
           <div class="eyebrow">Runtime</div>
+          <h2 id="goal">Loading objective…</h2>
           <div class="stats" id="stats"></div>
+          <p class="footer-note" id="runtimeDetails"></p>
         </div>
       </section>
 
-      <section class="grid">
-        <div class="card">
-          <div class="eyebrow">Next Up</div>
-          <div id="queue"></div>
+      <section class="stack">
+        <div class="triple">
+          <div class="card">
+            <div class="eyebrow">Queue Radar</div>
+            <h2 id="queueHeadline">Next posts ready</h2>
+            <div class="filter-row">
+              <button class="toggle active" data-filter="all">All</button>
+              <button class="toggle" data-filter="trend">Trend</button>
+              <button class="toggle" data-filter="evergreen">Evergreen</button>
+            </div>
+            <div id="queue"></div>
+          </div>
+          <div class="card">
+            <div class="eyebrow">Trend Radar</div>
+            <h2>Biggest stories in play</h2>
+            <div id="trends"></div>
+          </div>
+          <div class="card">
+            <div class="eyebrow">Recently Posted</div>
+            <h2>Latest publishing history</h2>
+            <div id="recent"></div>
+          </div>
         </div>
+
         <div class="card">
-          <div class="eyebrow">Top Trends</div>
-          <div id="trends"></div>
+          <div class="eyebrow">Operator Notes</div>
+          <h2>What this frontend is for</h2>
+          <p class="sub">
+            This console is meant to make the bot manageable after deployment: monitor the next queue items, inspect trend candidates, trigger a cycle manually, and confirm whether the app is still in dry-run mode before you let it post for real.
+          </p>
+          <p class="footer-note" id="updatedAt"></p>
         </div>
       </section>
     </main>
 
     <script>
+      let dashboardState = null;
+      let currentFilter = 'all';
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
+      }
+
+      function setActionStatus(message, mode = 'neutral') {
+        const node = document.getElementById('actionStatus');
+        node.className = `status-banner${mode === 'neutral' ? '' : ` ${mode}`}`;
+        node.textContent = message;
+      }
+
+      function renderQueue(items) {
+        const visible = items.filter((item) => currentFilter === 'all' || item.source === currentFilter);
+        document.getElementById('queue').innerHTML = visible.map((item) => `
+          <article class="item">
+            <div>
+              <span class="pill ${item.source === 'trend' ? 'signal' : ''}">${escapeHtml(item.source || 'legacy')}</span>
+              <span class="pill">${escapeHtml(item.experimentTag || item.pillar || 'queue')}</span>
+              ${item.visibilityRisk != null ? `<span class="pill risk">risk ${escapeHtml(item.visibilityRisk)}</span>` : ''}
+            </div>
+            <p class="text">${escapeHtml(item.text || '')}</p>
+            <p class="meta">
+              Predicted ${escapeHtml(item.predictedScore ?? 'n/a')}
+              ${item.topicCluster ? ` · cluster ${escapeHtml(item.topicCluster)}` : ''}
+              ${item.trendRef?.source ? ` · source ${escapeHtml(item.trendRef.source)}` : ''}
+            </p>
+          </article>
+        `).join('') || '<p class="meta">No queued posts in this filter.</p>';
+      }
+
+      function renderPosted(items) {
+        document.getElementById('recent').innerHTML = items.map((item) => `
+          <article class="item">
+            <div>
+              <span class="pill ${item.source === 'trend' ? 'signal' : ''}">${escapeHtml(item.source || 'legacy')}</span>
+              <span class="pill">${escapeHtml(item.experimentTag || item.pillar || 'posted')}</span>
+            </div>
+            <p class="text">${escapeHtml(item.text || '')}</p>
+            <p class="meta">${item.postedAt ? `Posted ${new Date(item.postedAt).toLocaleString()}` : 'Posted previously'}</p>
+          </article>
+        `).join('') || '<p class="meta">No posted history available yet.</p>';
+      }
+
+      function renderTrends(items) {
+        document.getElementById('trends').innerHTML = items.map((story) => `
+          <article class="item">
+            <a class="trend-link" href="${escapeHtml(story.url)}" target="_blank" rel="noreferrer">
+              <p class="text">${escapeHtml(story.headline)}</p>
+            </a>
+            <p class="meta">
+              ${escapeHtml(story.source)} · ${escapeHtml(story.category)} · score ${escapeHtml(story.trendScore)}
+              ${story.publishedAt ? ` · ${new Date(story.publishedAt).toLocaleString()}` : ''}
+            </p>
+          </article>
+        `).join('') || '<p class="meta">No live trend stories available.</p>';
+      }
+
+      function bindFilters() {
+        document.querySelectorAll('[data-filter]').forEach((button) => {
+          button.addEventListener('click', () => {
+            currentFilter = button.dataset.filter;
+            document.querySelectorAll('[data-filter]').forEach((node) => node.classList.remove('active'));
+            button.classList.add('active');
+            if (dashboardState) {
+              renderQueue(dashboardState.nextUp);
+            }
+          });
+        });
+      }
+
       async function load() {
         const res = await fetch('/api/status', { cache: 'no-store' });
         const data = await res.json();
+        dashboardState = data;
 
         document.getElementById('brand').textContent = `${data.brand.name} ${data.brand.handle}`;
         document.getElementById('niche').textContent = data.brand.niche;
+        document.getElementById('audience').textContent = `${data.brand.audience} · ${data.brand.disclosure}`;
+        document.getElementById('goal').textContent = data.brand.growthGoal;
+        document.getElementById('runtimeDetails').textContent =
+          `Queue target ${data.runtime.queueTarget}. Standard posts per run ${data.runtime.postsPerRun}. Trend posts per run ${data.runtime.trendPostsPerRun}. Trend autopost ${data.runtime.trendAutoPost ? 'enabled' : 'disabled'}.`;
+        document.getElementById('updatedAt').textContent =
+          `Last synced ${new Date(data.updatedAt).toLocaleString()}. Posted history shown here is based on stored queue state.`;
 
         const stats = [
           ['Queued posts', data.summary.queued],
           ['Posted', data.summary.posted],
           ['Trend stories', data.summary.trends],
-          ['Dry run', data.runtime.dryRun ? 'Yes' : 'No']
+          ['Dry run', data.runtime.dryRun ? 'Yes' : 'No'],
+          ['Trend queued', data.summary.queuedTrend],
+          ['Evergreen queued', data.summary.queuedEvergreen]
         ];
 
         document.getElementById('stats').innerHTML = stats.map(([label, value]) => `
           <div class="stat">
             <span class="label">${label}</span>
             <span class="value">${value}</span>
+            <span class="mini">${label === 'Dry run' ? 'Switch off before live posting' : 'Live deployment state'}</span>
           </div>
         `).join('');
 
-        document.getElementById('queue').innerHTML = data.nextUp.map((item) => `
-          <article class="item">
-            <div>
-              <span class="pill">${item.source}</span>
-              <span class="pill">${item.experimentTag}</span>
-            </div>
-            <p class="text">${item.text}</p>
-            <p class="meta">Predicted ${item.predictedScore} · Risk ${item.visibilityRisk ?? 'n/a'}</p>
-          </article>
-        `).join('');
-
-        document.getElementById('trends').innerHTML = data.topTrends.map((story) => `
-          <article class="item">
-            <p class="text">${story.headline}</p>
-            <p class="meta">${story.source} · ${story.category} · score ${story.trendScore}</p>
-          </article>
-        `).join('');
+        renderQueue(data.nextUp);
+        renderTrends(data.topTrends);
+        renderPosted(data.recentPosted);
       }
 
+      async function runCycleNow() {
+        const button = document.getElementById('runCycle');
+        const secret = document.getElementById('secret').value.trim();
+        button.disabled = true;
+        setActionStatus('Running fetch, queue generation, and posting cycle now…');
+
+        try {
+          const url = secret ? `/api/run-cycle?secret=${encodeURIComponent(secret)}` : '/api/run-cycle';
+          const res = await fetch(url, {
+            method: 'GET',
+            headers: secret ? { Authorization: `Bearer ${secret}` } : {}
+          });
+          const body = await res.json();
+
+          if (!res.ok || !body.ok) {
+            throw new Error(body.error || 'Run cycle failed');
+          }
+
+          setActionStatus('Run cycle completed. Refreshing dashboard state…', 'success');
+          await load();
+        } catch (error) {
+          setActionStatus(error.message || 'Run cycle failed.', 'error');
+        } finally {
+          button.disabled = false;
+        }
+      }
+
+      function loadSavedSecret() {
+        const saved = localStorage.getItem('x-autopilot-secret');
+        if (saved) {
+          document.getElementById('secret').value = saved;
+        }
+      }
+
+      document.getElementById('saveSecret').addEventListener('click', () => {
+        localStorage.setItem('x-autopilot-secret', document.getElementById('secret').value.trim());
+        setActionStatus('Secret stored in this browser. It is not sent anywhere until you trigger a manual run.', 'success');
+      });
       document.getElementById('refresh').addEventListener('click', load);
+      document.getElementById('runCycle').addEventListener('click', runCycleNow);
+      bindFilters();
+      loadSavedSecret();
       load().catch((error) => {
         document.getElementById('niche').textContent = error.message;
+        setActionStatus(error.message, 'error');
       });
     </script>
   </body>

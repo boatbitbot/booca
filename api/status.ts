@@ -15,13 +15,19 @@ export default async function handler(_req: VercelRequest, res: VercelResponse):
   const orderedQueue = optimizeQueueOrder(queue);
   const queued = orderedQueue.filter((item) => item.status === "queued");
   const posted = orderedQueue.filter((item) => item.status === "posted");
+  const queuedTrend = queued.filter((item) => item.source === "trend");
+  const queuedEvergreen = queued.filter((item) => item.source === "evergreen");
 
   res.setHeader("cache-control", "no-store");
   res.status(200).json({
+    updatedAt: new Date().toISOString(),
     brand: {
       name: persona.brandName,
       handle: persona.handle,
-      niche: persona.niche
+      niche: persona.niche,
+      audience: persona.audience,
+      disclosure: persona.disclosure,
+      growthGoal: persona.growthGoal
     },
     runtime: {
       dryRun: runtime.dryRun,
@@ -34,9 +40,12 @@ export default async function handler(_req: VercelRequest, res: VercelResponse):
       queued: queued.length,
       posted: posted.length,
       trends: trends.length,
-      performanceRecords: performance.length
+      performanceRecords: performance.length,
+      queuedTrend: queuedTrend.length,
+      queuedEvergreen: queuedEvergreen.length
     },
-    nextUp: queued.slice(0, 8),
-    topTrends: trends.slice(0, 8)
+    nextUp: queued.slice(0, 12),
+    recentPosted: posted.slice(-6).reverse(),
+    topTrends: trends.slice(0, 12)
   });
 }
