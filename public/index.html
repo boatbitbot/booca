@@ -100,6 +100,11 @@
         cursor: not-allowed;
       }
 
+      .button.small {
+        padding: 7px 12px;
+        font-size: 13px;
+      }
+
       .layout {
         display: grid;
         grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.85fr);
@@ -210,6 +215,13 @@
         flex-wrap: wrap;
       }
 
+      .item-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+
       .chip {
         border-radius: 999px;
         padding: 4px 10px;
@@ -283,6 +295,7 @@
         </div>
         <div class="actions">
           <button class="button" id="refresh">Refresh</button>
+          <button class="button" id="generatePosts">Generate posts</button>
           <button class="button primary" id="runCycle">Run cycle</button>
         </div>
       </div>
@@ -438,6 +451,14 @@
           `dry run ${runtime.dryRun ? "on" : "off"} · trend auto ${runtime.trendAutoPost ? "on" : "off"}`;
       }
 
+      function copyText(text) {
+        navigator.clipboard.writeText(text).then(() => {
+          setNotice("Post copied to clipboard.", "success");
+        }).catch(() => {
+          setNotice("Could not copy automatically. Select and copy the text manually.", "error");
+        });
+      }
+
       function renderQueue(items) {
         const visible = items.filter((item) => currentFilter === "all" || item.source === currentFilter);
         document.getElementById("queue").innerHTML = visible.map((item) => `
@@ -453,8 +474,15 @@
               ${item.topicCluster ? ` · ${escapeHtml(item.topicCluster)}` : ""}
               ${item.trendRef?.source ? ` · ${escapeHtml(item.trendRef.source)}` : ""}
             </div>
+            <div class="item-actions">
+              <button class="button small copy-button" data-copy="${escapeHtml(item.text)}">Copy post</button>
+            </div>
           </article>
         `).join("") || '<article class="item"><div class="meta">No posts in this filter.</div></article>';
+
+        document.querySelectorAll(".copy-button").forEach((button) => {
+          button.addEventListener("click", () => copyText(button.dataset.copy || ""));
+        });
       }
 
       function renderTrends(items) {
@@ -565,6 +593,37 @@
         }
       }
 
+      async function generatePosts() {
+        if (previewMode) {
+          render(fallbackState);
+          setNotice("Preview mode: showing sample post drafts. Deploy the app to generate live queue items.", "success");
+          return;
+        }
+
+        const button = document.getElementById("generatePosts");
+        button.disabled = true;
+        setNotice("Generating post drafts…", "success");
+
+        try {
+          const payload = await safeJson("/api/generate", { method: "GET" });
+          const nextState = {
+            ...dashboardState,
+            nextUp: payload.queued,
+            summary: {
+              ...dashboardState.summary,
+              queued: payload.queued.length
+            },
+            updatedAt: new Date().toISOString()
+          };
+          render(nextState);
+          setNotice(`Generated ${payload.generatedCount} fresh post drafts.`, "success");
+        } catch (error) {
+          setNotice(error.message || "Generate failed.", "error");
+        } finally {
+          button.disabled = false;
+        }
+      }
+
       document.querySelectorAll("[data-filter]").forEach((button) => {
         button.addEventListener("click", () => {
           currentFilter = button.dataset.filter;
@@ -575,6 +634,7 @@
       });
 
       document.getElementById("refresh").addEventListener("click", loadLiveIfAvailable);
+      document.getElementById("generatePosts").addEventListener("click", generatePosts);
       document.getElementById("runCycle").addEventListener("click", runCycle);
 
       render(fallbackState);

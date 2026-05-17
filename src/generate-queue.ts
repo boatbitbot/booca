@@ -6,8 +6,9 @@ import { generateQueueItems } from "./lib/content-engine.js";
 import { createTrendQueueItems } from "./lib/trend-content.js";
 import { optimizeQueueOrder, readQueue, writeQueue } from "./lib/queue-store.js";
 import { readTrends } from "./lib/trend-store.js";
+import type { QueueItem } from "./types.js";
 
-export async function generateQueue(): Promise<void> {
+export async function generateQueue(): Promise<QueueItem[]> {
   const queue = await readQueue();
   const queuedCount = queue.filter((item) => item.status === "queued").length;
   const toCreate = Math.max(runtime.queueTarget - queuedCount, 0);
@@ -23,13 +24,14 @@ export async function generateQueue(): Promise<void> {
 
   if (toCreate === 0 && generated.length === 0) {
     console.log(`Queue already has ${queuedCount} queued posts.`);
-    return;
+    return [];
   }
 
   const nextQueue = optimizeQueueOrder([...queue, ...generated]);
   await writeQueue(nextQueue);
 
   console.log(`Generated ${generated.length} queue items. Total records: ${nextQueue.length}.`);
+  return generated;
 }
 
 const isEntryPoint =
