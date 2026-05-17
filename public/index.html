@@ -475,6 +475,17 @@
         node.textContent = message;
       }
 
+      async function readJsonResponse(response) {
+        const raw = await response.text();
+
+        try {
+          return JSON.parse(raw);
+        } catch {
+          const trimmed = raw.trim();
+          throw new Error(trimmed || `Request failed with status ${response.status}`);
+        }
+      }
+
       function applyRuntimeGuards() {
         if (!isFileMode) {
           return;
@@ -565,7 +576,10 @@
           setActionStatus("Local preview mode: open the deployed Vercel URL to use live API data and manual controls.", "success");
         } else {
           const res = await fetch("/api/status", { cache: "no-store" });
-          data = await res.json();
+          data = await readJsonResponse(res);
+          if (!res.ok || data.ok === false) {
+            throw new Error(data.error || "Failed to load dashboard status");
+          }
         }
 
         dashboardState = data;
@@ -621,7 +635,7 @@
             method: "GET",
             headers: secret ? { Authorization: `Bearer ${secret}` } : {}
           });
-          const body = await res.json();
+          const body = await readJsonResponse(res);
 
           if (!res.ok || !body.ok) {
             throw new Error(body.error || "Run cycle failed");
